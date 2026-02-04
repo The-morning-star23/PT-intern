@@ -3,7 +3,7 @@
 This repository contains the backend architectural design and a sample API for the Schedula Healthcare System.
 
 ## 🔗 Submission Links
-- **Loom Video Explanation:** [PASTE YOUR LOOM LINK HERE]
+- **Loom Video Explanation:** (https://www.loom.com/share/34cc68cf05c141b69fc6c4af3415fec4)
 - **API Endpoint:** `/api/hello`
 
 ## 📊 Entity Relationship Diagram
