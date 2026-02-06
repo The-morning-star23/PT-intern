@@ -27,7 +27,6 @@ Below is the database schema designed based on the provided wireframes.
 I have successfully integrated a local **PostgreSQL** database with this Next.js project using **Prisma ORM**.
 
 ### 🛠️ How to Verify the Connection
-
 To verify the database connection on your local machine, follow these steps:
 
 1. **Environment Setup**: 
@@ -52,6 +51,7 @@ To verify the database connection on your local machine, follow these steps:
 The current schema includes:
 - **User Table**: Stores authentication and mobile number data.
 - **Profile Table**: Handles multi-member family profiles (e.g., Self, Wife, Son).
+
 
 ## 📅 Appointment Booking System - Phase 1 Backend
 
@@ -87,6 +87,12 @@ This repository contains the core backend services for the Schedula Appointment 
 | POST | `/api/v1/appointments/book` | Book a new slot (supports family count) |
 | PATCH | `/api/v1/appointments/{id}` | Reschedule or cancel an appointment |
 | POST | `/api/v1/doctor/leave` | Bulk cancel appointments for doctor leave |
+
+### Technical Stack
+- **Framework:** Next.js 15+ (Turbopack)
+- **Database:** PostgreSQL via Prisma ORM
+- **Authentication:** NextAuth.js (Auth.js v5)
+- **Documentation:** Swagger / OpenAPI 3.0
 
 ### 📖 How to Test
 
