@@ -1,6 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+/**
+ * @openapi
+ * /api/v1/doctor/search:
+ *   get:
+ *     summary: Search doctors by specialization
+ *     description: Returns a list of doctors filtered by specialization
+ *     parameters:
+ *       - in: query
+ *         name: specialization
+ *         schema:
+ *           type: string
+ *         description: The specialization to filter by (e.g., Cardiologist)
+ *     responses:
+ *       200:
+ *         description: Array of doctor objects
+ */
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -8,7 +25,6 @@ export async function GET(request: Request) {
 
     const doctors = await prisma.doctor.findMany({
       where: {
-        // If specialization is provided, filter by it; otherwise, return all
         specialization: specialization 
           ? { contains: specialization, mode: 'insensitive' } 
           : undefined,
