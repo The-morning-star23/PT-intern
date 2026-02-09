@@ -7,7 +7,7 @@ This repository contains the backend architectural design and a sample API for t
 - **API Endpoint:** `/api/hello`
 
 ## 📊 Entity Relationship Diagram
-Below is the database schema designed based on the provided wireframes.
+Below is the database schema designed based on the provided wireframe.
 
 ![ER Diagram](./docs/ER-Diagram.png)
 
