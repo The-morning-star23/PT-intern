@@ -8,16 +8,75 @@ generator client {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  mobile_number String   @unique
-  profiles      Profile[]
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("PATIENT") // Default role
+  accounts      Account[]
+  sessions      Session[]
+
+  doctor Doctor? // A user can optionally be a doctor
+
+  appointments Appointment[] // A user (patient) can have many appointments
 }
 
-model Profile {
-  id      Int    @id @default(autoincrement())
-  userId  Int
-  user    User   @relation(fields: [userId], references: [id])
-  name    String
-  age     Int
-  relationship String // e.g., 'Self', 'Wife'
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Doctor {
+  id             String         @id @default(cuid())
+  userId         String         @unique
+  user           User           @relation(fields: [userId], references: [id])
+  specialization String
+  bio            String?
+  availabilities Availability[]
+  appointments   Appointment[]
+}
+
+model Availability {
+  id        String @id @default(cuid())
+  doctorId  String
+  doctor    Doctor @relation(fields: [doctorId], references: [id])
+  dayOfWeek Int // 0 (Sunday) to 6 (Saturday)
+  startTime String // e.g., "09:00"
+  endTime   String // e.g., "17:00"
+  type      String @default("STREAM") // STREAM or WAVE scheduling
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  doctorId    String
+  patientId   String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  patient     User     @relation(fields: [patientId], references: [id])
+  startTime   DateTime
+  endTime     DateTime
+  status      String   @default("BOOKED") // BOOKED, CANCELLED, COMPLETED
+  familyCount Int      @default(1) // Supports 2-3 members per token
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
