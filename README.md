@@ -20,4 +20,4 @@ Below is the database schema designed based on the provided wireframes.
 1. Clone the repo: `git clone https://github.com/The-morning-star23/PT-intern.git`
 2. Install dependencies: `npm install`
 3. Run locally: `npm run dev`
-4. Access API: `http://localhost:3000/api/hello`
+4. Access API: `http://localhost:3000/api/hello` 
