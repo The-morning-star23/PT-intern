@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function PATCH(
   request: Request,
   { params }: { params: { appointmentId: string } }
 ) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -16,7 +17,31 @@ export async function PATCH(
     const body = await request.json();
     const { status, newStartTime } = body;
 
-    // Prepare update data
+    // 1. Fetch existing appointment to check ownership
+    const existingAppointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: { doctor: true, patient: true }
+    });
+
+    if (!existingAppointment) {
+      return NextResponse.json({ error: "Appointment not found" }, { status: 404 });
+    }
+
+    // 2. Role-Based Access Control (RBAC) Logic
+    const isDoctor = session.user.role === "DOCTOR";
+    const isPatient = session.user.role === "PATIENT";
+
+    // Ensure the Doctor only edits THEIR appointments
+    if (isDoctor && existingAppointment.doctor.userId !== session.user.id) {
+        return NextResponse.json({ error: "Forbidden: Not your patient" }, { status: 403 });
+    }
+
+    // Ensure the Patient only edits THEIR appointments
+    if (isPatient && existingAppointment.patient.userId !== session.user.id) {
+        return NextResponse.json({ error: "Forbidden: Not your appointment" }, { status: 403 });
+    }
+
+    // 3. Prepare update data (Your existing logic)
     const updateData: {
       status?: string;
       startTime?: Date;
