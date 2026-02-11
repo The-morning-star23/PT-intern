@@ -1,28 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { authorizeRole } from "@/lib/role-check";
 
 /**
  * @openapi
  * /api/v1/doctor/{doctorId}/availability:
  *   get:
- *     summary: Get doctor availability
+ *     summary: Get doctor availability (Public)
  *     description: Returns the availability slots for a specific doctor
- *     parameters:
- *       - in: path
- *         name: doctorId
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID of the doctor
- *     responses:
- *       200:
- *         description: Availability slots found
- *       404:
- *         description: No availability found
+ *   post:
+ *     summary: Add doctor availability (Doctor Only)
+ *     description: Allows a doctor to manage their own schedule
  */
 
+// --- GET: Publicly view availability ---
 export async function GET(
-  request: Request,
+  req: Request,
   { params }: { params: { doctorId: string } }
 ) {
   try {
@@ -38,7 +31,49 @@ export async function GET(
 
     return NextResponse.json(availability, { status: 200 });
   } catch (error) {
-    console.error("Availability API Error:", error);
+    console.error("Availability GET Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+// --- POST: Doctor manages their own availability ---
+export async function POST(
+  req: Request,
+  { params }: { params: { doctorId: string } }
+) {
+  try {
+    // 1. Role-Based Security: Ensure the user is a logged-in DOCTOR
+    const { authorized, user, response } = await authorizeRole("DOCTOR");
+    if (!authorized) return response;
+
+    // 2. Ownership Check: Ensure Doctor A cannot edit Doctor B's schedule
+    const doctorProfile = await prisma.doctor.findUnique({
+      where: { userId: user.id }
+    });
+
+    if (!doctorProfile || doctorProfile.id !== params.doctorId) {
+      return NextResponse.json(
+        { error: "Forbidden: You can only manage your own schedule" }, 
+        { status: 403 }
+      );
+    }
+
+    // 3. Process the new slot data
+    const { dayOfWeek, startTime, endTime, type } = await req.json();
+
+    const newSlot = await prisma.availability.create({
+      data: {
+        doctorId: params.doctorId,
+        dayOfWeek,
+        startTime,
+        endTime,
+        type: type || "STREAM",
+      },
+    });
+
+    return NextResponse.json(newSlot, { status: 201 });
+  } catch (error) {
+    console.error("Availability POST Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
