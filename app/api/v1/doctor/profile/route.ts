@@ -30,7 +30,15 @@ export async function PATCH(req: Request) {
       hospitalName: data.hospitalName,
       consultationFee: data.consultationFee,
       education: data.education,
-      // Add other fields here to reach your 20-field count
+      phone: data.phone,
+      clinicAddress: data.clinicAddress,
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode,
+      consultationType: data.consultationType,
+      languages: data.languages,
+      achievements: data.achievements,
+      profileStatus: data.profileStatus,
     },
   });
 

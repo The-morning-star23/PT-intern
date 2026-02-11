@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "@/lib/prisma"; // Adjust path to your prisma client
+import { prisma } from "@/lib/prisma";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -21,9 +21,6 @@ export const authOptions = {
       }
       return session;
     },
-  },
-  pages: {
-    signIn: '/auth/signin', // Optional: if you want a custom sign-in page
   },
 };
 

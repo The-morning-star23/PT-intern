@@ -57,44 +57,62 @@ model Session {
 // --- CORE BUSINESS MODELS ---
 
 model Doctor {
-  id              String         @id @default(cuid())
-  userId          String         @unique
-  user            User           @relation(fields: [userId], references: [id])
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  user             User           @relation(fields: [userId], references: [id])
   
-  // Doctor Experience Fields (Expand these to reach 20)
-  specialization  String
-  licenseNumber   String?        @unique
-  experienceYears Int?
-  bio             String?        @db.Text
-  hospitalName    String?
-  consultationFee Float?
-  education       String?
-  languages       String[]       // Array of strings
-  rating          Float          @default(0.0)
-  isVerified      Boolean        @default(false)
+  specialization   String
+  licenseNumber    String?        @unique
+  experienceYears  Int?
+  bio              String?        @db.Text
+  hospitalName     String?
+  consultationFee  Float?
+  education        String?
+  languages        String[]
+  rating           Float          @default(0.0)
+  isVerified       Boolean        @default(false)
+  
+  // NEW FIELDS to reach 20
+  clinicAddress    String?
+  city             String?
+  state            String?
+  zipCode          String?
+  consultationType String         @default("PHYSICAL") // VIRTUAL, PHYSICAL, BOTH
+  phone            String?
+  achievements     String?        @db.Text
+  profileStatus    String         @default("PENDING") // ACTIVE, PENDING, INACTIVE
 
-  availabilities  Availability[]
-  appointments    Appointment[]
+  availabilities   Availability[]
+  appointments     Appointment[]
 }
 
 model Patient {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id])
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
 
-  // Patient Profile Fields (Expand these to reach 18)
-  phoneNumber    String?
-  dateOfBirth    DateTime?
-  gender         String?
-  bloodGroup     String?
-  address        String?
+  phoneNumber      String?
+  dateOfBirth      DateTime?
+  gender           String?
+  bloodGroup       String?
+  address          String?
   emergencyContact String?
-  allergies      String?
-  medicalHistory String?  @db.Text
-  weight         Float?
-  height         Float?
+  allergies        String?
+  medicalHistory   String?  @db.Text
+  weight           Float?
+  height           Float?
+  
+  // NEW FIELDS to reach 18
+  occupation       String?
+  maritalStatus    String?
+  smokingStatus    Boolean  @default(false)
+  alcoholStatus    Boolean  @default(false)
+  chronicConditions String?
+  insuranceProvider String?
+  insuranceNumber  String?
+  preferredLanguage String  @default("English")
 
-  appointments   Appointment[]
+  appointments     Appointment[]
 }
 
 model Availability {
