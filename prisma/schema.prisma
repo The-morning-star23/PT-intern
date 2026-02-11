@@ -7,70 +7,43 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// --- AUTHENTICATION MODELS (NextAuth Standard) ---
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          String    @default("PATIENT") // Default role
+  role          String    @default("PATIENT") // PATIENT or DOCTOR
+  
   accounts      Account[]
   sessions      Session[]
 
-  doctor Doctor? // A user can optionally be a doctor
+  // Profiles
+  doctor        Doctor?
+  patient       Patient?  // New: Dedicated profile for Patient specific data
 
-  appointments Appointment[] // A user (patient) can have many appointments
+  createdAt     DateTime  @default(now())
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-}
-
-model Doctor {
-  id             String         @id @default(cuid())
-  userId         String         @unique
-  user           User           @relation(fields: [userId], references: [id])
-  specialization String
-  bio            String?
-  availabilities Availability[]
-  appointments   Appointment[]
-}
-
-model Availability {
-  id        String @id @default(cuid())
-  doctorId  String
-  doctor    Doctor @relation(fields: [doctorId], references: [id])
-  dayOfWeek Int // 0 (Sunday) to 6 (Saturday)
-  startTime String // e.g., "09:00"
-  endTime   String // e.g., "17:00"
-  type      String @default("STREAM") // STREAM or WAVE scheduling
-}
-
-model Appointment {
-  id          String   @id @default(cuid())
-  doctorId    String
-  patientId   String
-  doctor      Doctor   @relation(fields: [doctorId], references: [id])
-  patient     User     @relation(fields: [patientId], references: [id])
-  startTime   DateTime
-  endTime     DateTime
-  status      String   @default("BOOKED") // BOOKED, CANCELLED, COMPLETED
-  familyCount Int      @default(1) // Supports 2-3 members per token
 }
 
 model Session {
@@ -79,4 +52,71 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- CORE BUSINESS MODELS ---
+
+model Doctor {
+  id              String         @id @default(cuid())
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id])
+  
+  // Doctor Experience Fields (Expand these to reach 20)
+  specialization  String
+  licenseNumber   String?        @unique
+  experienceYears Int?
+  bio             String?        @db.Text
+  hospitalName    String?
+  consultationFee Float?
+  education       String?
+  languages       String[]       // Array of strings
+  rating          Float          @default(0.0)
+  isVerified      Boolean        @default(false)
+
+  availabilities  Availability[]
+  appointments    Appointment[]
+}
+
+model Patient {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+
+  // Patient Profile Fields (Expand these to reach 18)
+  phoneNumber    String?
+  dateOfBirth    DateTime?
+  gender         String?
+  bloodGroup     String?
+  address        String?
+  emergencyContact String?
+  allergies      String?
+  medicalHistory String?  @db.Text
+  weight         Float?
+  height         Float?
+
+  appointments   Appointment[]
+}
+
+model Availability {
+  id        String @id @default(cuid())
+  doctorId  String
+  doctor    Doctor @relation(fields: [doctorId], references: [id])
+  dayOfWeek Int    // 0 (Sun) to 6 (Sat)
+  startTime String 
+  endTime   String 
+  type      String @default("STREAM") 
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  doctorId    String
+  patientId   String
+  
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  patient     Patient  @relation(fields: [patientId], references: [id]) // Updated to point to Patient model
+  
+  startTime   DateTime
+  endTime     DateTime
+  status      String   @default("BOOKED") 
+  familyCount Int      @default(1) 
 }
